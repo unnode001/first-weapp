@@ -1,16 +1,68 @@
 // 文档教程: https://uniapp.dcloud.net.cn/uniCloud/schema
 {
 	"bsonType": "object",
-	"required": [],
+	"required": ["table_number"],
 	"permission": {
-		"read": false,
-		"create": false,
-		"update": false,
-		"delete": false
+		"read": true,
+		"create": "auth.permission.includes('ADMIN')",
+		"update": "auth.permission.includes('ADMIN')",
+		"delete": "auth.permission.includes('ADMIN')"
 	},
 	"properties": {
 		"_id": {
 			"description": "ID，系统自动生成"
+		},
+		"table_number": {
+			"bsonType": "string",
+			"description": "桌号",
+			"label": "桌号",
+			"title": "桌号",
+			"trim": "both"
+		},
+		"qrcode_url": {
+			"bsonType": "string",
+			"description": "点餐二维码（小程序码）云存储地址",
+			"label": "点餐二维码",
+			"title": "点餐二维码"
+		},
+		"qrcode_file_id": {
+			"bsonType": "string",
+			"description": "二维码文件ID（云存储FileID）",
+			"label": "二维码文件ID"
+		},
+		"status": {
+			"bsonType": "int",
+			"description": "桌号状态：0-空闲，1-使用中，2-已预订",
+			"label": "桌号状态",
+			"defaultValue": 0,
+			"enum": [
+				{
+					"value": 0,
+					"text": "空闲"
+				},
+				{
+					"value": 1,
+					"text": "使用中"
+				},
+				{
+					"value": 2,
+					"text": "已预订"
+				}
+			]
+		},
+		"seat_count": {
+			"bsonType": "int",
+			"description": "座位数",
+			"label": "座位数",
+			"defaultValue": 4
+		},
+		"create_date": {
+			"bsonType": "timestamp",
+			"description": "创建时间",
+			"label": "创建时间",
+			"forceDefaultValue": {
+				"$env": "now"
+			}
 		}
 	}
 }
