@@ -40,7 +40,7 @@ first-weapp/
 ├── .claude/                    # Claude Code 配置
 │   └── PROJECT_INDEX.md       # 项目索引文件（本文件）
 ├── pages/                      # 主包页面（Tab 页面）
-│   ├── index/                 # 首页（自定义导航）
+│   ├── index/                 # 首页（自定义导航、扫码弹窗）
 │   ├── menu/                  # 点餐页（菜单浏览）
 │   ├── order/                 # 订单页（订单列表）
 │   └── my/                    # 我的页面（自定义导航）
@@ -60,8 +60,15 @@ first-weapp/
 ├── common/                     # 公共资源
 │   └── menu.js                # 菜单数据配置（4大分类，13道菜品）
 ├── uniCloud-aliyun/           # UniCloud 云开发
+│   ├── cloudfunctions/        # 云函数/云对象
+│   │   └── zhuohao/          # 桌号管理云对象
+│   │       ├── index.obj.js  # 云对象主文件
+│   │       └── package.json  # 依赖配置
 │   └── database/              # 数据库配置
+│       ├── zhuohao.schema.json    # 桌号表结构
 │       └── JQL查询.jql        # 数据库查询文件
+├── docs/                       # 项目文档
+│   └── TABLE_MANAGEMENT.md    # 桌号管理功能文档
 ├── App.vue                     # 应用入口组件
 ├── main.js                     # 应用入口 JS
 ├── pages.json                  # 页面路由配置
@@ -76,11 +83,15 @@ first-weapp/
 
 ### 1. 首页模块 (`pages/index/`)
 - **路由**: `pages/index/index`
-- **特点**: 自定义导航栏
+- **特点**: 自定义导航栏，扫码弹窗
 - **功能**:
   - 展示餐厅信息
   - 快速点餐入口
   - 推荐菜品展示
+  - **扫码点餐**：扫描桌号小程序码后自动弹窗
+    - 显示桌号信息
+    - 选择就餐人数（1-8人）
+    - 自动跳转到菜单页面
 
 ### 2. 点餐模块 (`pages/menu/`)
 - **路由**: `pages/menu/menu`
@@ -145,6 +156,44 @@ first-weapp/
   - 订单完整信息
   - 菜品明细
   - 配送信息
+
+### 7. 桌号管理模块 ⭐ 新功能
+- **云对象**: `uniCloud-aliyun/cloudfunctions/zhuohao/index.obj.js`
+- **数据库**: `uniCloud-aliyun/database/zhuohao.schema.json`
+- **核心功能**:
+  - **生成小程序码** (`generateTableQRCode`)
+    - 为每个桌号生成专属小程序码
+    - 使用微信 API `getUnlimitedQRCode`
+    - 自动上传到云存储
+    - 保存到数据库
+  - **桌号管理** (`getTableList`, `getTableInfo`)
+    - 获取所有桌号列表
+    - 查询单个桌号详情
+  - **状态管理** (`updateTableStatus`)
+    - 空闲（0）/ 使用中（1）/ 已预订（2）
+    - 扫码后自动更新为使用中
+  - **删除桌号** (`deleteTable`)
+    - 删除数据库记录
+    - 同步删除云存储中的小程序码
+
+**数据模型**:
+```javascript
+{
+  table_number: "A01",           // 桌号
+  qrcode_url: "cloud://xxx",     // 小程序码地址
+  status: 1,                     // 状态：0-空闲，1-使用中，2-已预订
+  seat_count: 4,                 // 座位数
+  create_date: 1699999999999     // 创建时间
+}
+```
+
+**使用流程**:
+1. 管理员调用云对象生成桌号小程序码
+2. 顾客扫码自动进入首页
+3. 弹窗显示桌号和人数选择
+4. 确认后跳转到菜单页面开始点餐
+
+📖 详细文档：[桌号管理功能文档](../docs/TABLE_MANAGEMENT.md)
 
 ---
 
@@ -218,9 +267,15 @@ interface MenuCategory {
 - [x] 分包预加载优化
 - [x] 自定义导航栏配置（首页、我的）
 - [x] 数据库 JQL 查询文件准备
+- [x] **桌号管理功能** ⭐
+  - [x] 云对象：生成小程序码、管理桌号
+  - [x] 数据库表：桌号信息存储
+  - [x] 扫码识别：自动识别桌号并弹窗
+  - [x] 人数选择：1-8人就餐人数选择
+  - [x] 状态管理：桌号状态自动更新
 
 ### 🔧 开发中
-- [ ] 页面 UI 实现（8个页面待开发）
+- [ ] 页面 UI 实现（7个页面待开发，首页扫码功能已完成）
 - [ ] 购物车逻辑实现
 - [ ] 订单创建流程
 - [ ] 微信支付集成
@@ -230,7 +285,7 @@ interface MenuCategory {
 ### 📋 待规划
 - [ ] 云函数开发（订单、支付）
 - [ ] 数据库表设计（用户、订单、菜品）
-- [ ] 扫码点餐功能（桌号识别）
+- [ ] 桌号管理后台页面（可视化管理）
 - [ ] 实时订单推送
 - [ ] 订单评价功能
 - [ ] 优惠券系统
@@ -255,7 +310,7 @@ interface MenuCategory {
 | 文件/目录 | 说明 | 状态 |
 |----------|------|------|
 | `common/menu.js` | 菜单数据配置 | ✅ 完成 |
-| `pages/index/index.vue` | 首页 | 🔧 开发中 |
+| `pages/index/index.vue` | 首页（含扫码弹窗） | ✅ 扫码功能已完成 |
 | `pages/menu/menu.vue` | 点餐页 | 🔧 开发中 |
 | `pages/order/order.vue` | 订单列表 | 🔧 开发中 |
 | `pages/my/my.vue` | 个人中心 | 🔧 开发中 |
@@ -267,8 +322,18 @@ interface MenuCategory {
 
 | 文件/目录 | 说明 | 状态 |
 |----------|------|------|
+| `uniCloud-aliyun/cloudfunctions/zhuohao/` | 桌号管理云对象 | ✅ 完成 |
+| `uniCloud-aliyun/cloudfunctions/zhuohao/index.obj.js` | 云对象主文件（5个方法） | ✅ 完成 |
 | `uniCloud-aliyun/database/` | 数据库配置 | ✅ 初始化 |
+| `uniCloud-aliyun/database/zhuohao.schema.json` | 桌号表结构 | ✅ 完成 |
 | `uniCloud-aliyun/database/JQL查询.jql` | 数据库查询 | ✅ 已创建 |
+
+### 文档文件
+
+| 文件/目录 | 说明 | 状态 |
+|----------|------|------|
+| `docs/TABLE_MANAGEMENT.md` | 桌号管理功能文档 | ✅ 完成 |
+| `.claude/PROJECT_INDEX.md` | 项目索引文档 | ✅ 持续更新 |
 
 ---
 
