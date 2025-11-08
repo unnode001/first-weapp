@@ -1,0 +1,26 @@
+# Node modules
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Build files
+unpackage/
+dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# uniCloud
+uniCloud-aliyun/cloudfunctions/node_modules/
+
+# HBuilderX
+.hbuilderx/
